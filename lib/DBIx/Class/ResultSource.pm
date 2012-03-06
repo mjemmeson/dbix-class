@@ -13,7 +13,7 @@ use DBIx::Class::Carp;
 use Devel::GlobalDestruction;
 use Try::Tiny;
 use List::Util 'first';
-use Scalar::Util qw/blessed weaken isweak/;
+use Scalar::Util qw/blessed weaken isweak refaddr/;
 
 use namespace::clean;
 
@@ -1098,6 +1098,12 @@ clause contents.
 =cut
 
 sub from { die 'Virtual method!' }
+
+use overload
+    '""' => sub { my $name = $_[0]->from; return ref $name ? $$name : $name },
+    '0+' => sub { refaddr($_[0]) },
+    '==' => sub { refaddr($_[0]) == refaddr($_[1]) },
+    fallback => 1;
 
 =head2 schema
 

@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Builder;
 use lib qw(t/lib);
 use DBICTest;
 use IO::File;
@@ -12,9 +13,12 @@ my $sdebug = $schema->storage->debug;
 # once the following TODO is complete, remove the 2 warning tests immediately
 # after the TODO block
 # (the TODO block itself contains tests ensuring that the warns are removed)
-TODO: {
-    local $TODO = 'Prefetch of multiple has_many rels at the same level (currently warn to protect the clueless git)';
 
+# Using selective TODOs to clean up tests
+my $Test = Test::Builder->new;
+my $TODO_msg = 'Prefetch of multiple has_many rels at the same level (currently warn to protect the clueless git)';
+
+TODO: {
     #( 1 -> M + M )
     my $cd_rs = $schema->resultset('CD')->search ({ 'me.title' => 'Forkful of bees' });
     my $pr_cd_rs = $cd_rs->search ({}, {
@@ -37,12 +41,15 @@ TODO: {
     };
     $pr_tracks_count = $pr_tracks_rs->count;
 
+    $Test->todo_start($TODO_msg);
     ok(! $o_mm_warn, 'no warning on attempt to prefetch several same level has_many\'s (1 -> M + M)');
 
+    $Test->todo_end;
     is($queries, 1, 'prefetch one->(has_many,has_many) ran exactly 1 query');
     $schema->storage->debugcb (undef);
     $schema->storage->debug ($sdebug);
 
+    $Test->todo_start($TODO_msg);
     is($pr_tracks_count, $tracks_count, 'equal count of prefetched relations over several same level has_many\'s (1 -> M + M)');
     is ($pr_tracks_rs->all, $tracks_rs->all, 'equal amount of objects returned with and without prefetch over several same level has_many\'s (1 -> M + M)');
 
@@ -72,6 +79,7 @@ TODO: {
 
     ok(! $m_o_mm_warn, 'no warning on attempt to prefetch several same level has_many\'s (M -> 1 -> M + M)');
 
+    $Test->todo_end;
     is($queries, 1, 'prefetch one->(has_many,has_many) ran exactly 1 query');
     $schema->storage->debugcb (undef);
     $schema->storage->debug ($sdebug);

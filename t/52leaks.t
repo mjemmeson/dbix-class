@@ -405,7 +405,9 @@ for my $moniker ( keys %{DBICTest::Schema->source_registrations || {}} ) {
 #           \-------- bound value on prepared/cached STH  <-----------/
 #
 TODO: {
-  local $TODO = 'Not sure how to fix this yet, an entanglment could be an option';
+  local $TODO = 'Not sure how to fix this yet, an entanglment could be an option'
+    if ($^O ne 'MSWin32');  # Works in Strawberry Perl Win32; still fails on Debian Linux
+
   my $r = $weak_registry->{'basic leaky_resultset_cond'}{weakref};
   ok(! defined $r, 'We no longer leak!')
     or $r->result_source(undef);

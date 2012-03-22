@@ -3,6 +3,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Test::Builder;
 use lib qw(t/lib);
 use DBICTest;
 
@@ -28,9 +29,10 @@ my $schema = DBICTest->init_schema();
 #
 # ribasushi
 
-TODO: { my $f = __FILE__; local $TODO = "See comment at top of $f for discussion of the TODO";
+my $f = __FILE__; my $TODO_msg = "See comment at top of $f for discussion of the TODO";
+my $Test = Test::Builder->new;  # no worries; it's a singleton to Test::More's instance
 
-{
+TODO: {
   my $counts;
   $counts->{$_} = $schema->resultset($_)->count for qw/Track CD Genre/;
 
@@ -52,12 +54,14 @@ TODO: { my $f = __FILE__; local $TODO = "See comment at top of $f for discussion
 
     is ($schema->resultset('Track')->count, $counts->{Track} + 1, '1 new track');
     is ($schema->resultset('CD')->count, $counts->{CD}, 'No new cds');
+    $Test->todo_start($TODO_msg);  # local $TODO wouldn't work right with these two below and lives_ok failing, so we need to use todo_start
     is ($schema->resultset('Genre')->count, $counts->{Genre} + 1, '1 new genre');
 
     is ($existing_nogen_cd->genre->title,  'sugar genre', 'Correct genre assigned to CD');
   }, 'create() did not throw');
+  $Test->todo_end;
 }
-{
+TODO: {
   my $counts;
   $counts->{$_} = $schema->resultset($_)->count for qw/Artist CD Producer/;
 
@@ -89,6 +93,7 @@ TODO: { my $f = __FILE__; local $TODO = "See comment at top of $f for discussion
 
     is ($schema->resultset('Artist')->count, $counts->{Artist}, 'No new artists');
     is ($schema->resultset('Producer')->count, $counts->{Producer} + 1, '1 new producers');
+    $Test->todo_start($TODO_msg);
     is ($schema->resultset('CD')->count, $counts->{CD} + 2, '2 new cds');
 
     is ($producer->cds->count, 2, 'CDs assigned to correct producer');
@@ -97,9 +102,8 @@ TODO: { my $f = __FILE__; local $TODO = "See comment at top of $f for discussion
       [ qw/queen1 queen2/ ],
       'Correct cd names',
     );
+    $Test->todo_end;
   }, 'create() did not throw');
-}
-
 }
 
 done_testing;

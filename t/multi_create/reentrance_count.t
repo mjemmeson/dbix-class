@@ -12,8 +12,7 @@ my $query_stats;
 $schema->storage->debugcb (sub { push @{$query_stats->{$_[0]}}, $_[1] });
 $schema->storage->debug (1);
 
-TODO: {
-  local $TODO = 'This is an optimization task, will wait... a while';
+my $TODO_msg = 'This is an optimization task, will wait... a while';
 
 lives_ok (sub {
   undef $query_stats;
@@ -56,6 +55,7 @@ lives_ok (sub {
   });
 
   is ( @{$query_stats->{INSERT} || []}, 4, 'number of inserts during creation of artist with 2 cds, converging on the same genre' );
+  local $TODO = $TODO_msg;
   is ( @{$query_stats->{SELECT} || []}, 0, 'number of selects during creation of artist with 2 cds, converging on the same genre' )
     || $ENV{DBIC_MULTICREATE_DEBUG} && diag join "\n", @{$query_stats->{SELECT} || []};
 });
@@ -117,6 +117,7 @@ lives_ok (sub {
   });
 
   is ( @{$query_stats->{INSERT} || []}, 6, 'number of inserts during creation of artist->cd->producer->cd->same_artist' );
+  local $TODO = $TODO_msg;
   is ( @{$query_stats->{SELECT} || []}, 0, 'number of selects during creation of artist->cd->producer->cd->same_artist' )
     || $ENV{DBIC_MULTICREATE_DEBUG} && diag join "\n", @{$query_stats->{SELECT} || []};
 });
@@ -146,6 +147,7 @@ lives_ok (sub {
     ],
   });
 
+  local $TODO = $TODO_msg;
   is ( @{$query_stats->{INSERT} || []}, 4, 'number of inserts during creation of existing_artist->cd->existing_producer->cd->existing_artist2' );
   is ( @{$query_stats->{SELECT} || []}, 0, 'number of selects during creation of existing_artist->cd->existing_producer->cd->existing_artist2' )
     || $ENV{DBIC_MULTICREATE_DEBUG} && diag join "\n", @{$query_stats->{SELECT} || []};
@@ -169,10 +171,9 @@ lives_ok (sub {
   });
 
   is ( @{$query_stats->{INSERT} || []}, 2, 'number of inserts during creation of artist_object->cd->producer_object' );
+  local $TODO = $TODO_msg;
   is ( @{$query_stats->{SELECT} || []}, 0, 'number of selects during creation of artist_object->cd->producer_object' )
     || $ENV{DBIC_MULTICREATE_DEBUG} && diag join "\n", @{$query_stats->{SELECT} || []};
 });
-
-}
 
 done_testing;

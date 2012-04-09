@@ -1,6 +1,10 @@
 Revision history for DBIx::Class
 
     * New Features / Changes
+	     - Add new -concat "function" indicating rhs is an arrayref of
+		    an concatenation operator/function, normalized to the storage
+			 platform used.  For example:
+			 { col => { -concat => ['snum', \"' '", 'street'] } }
         - Issue a warning when DateTime objects are passed to ->search
         - Fast populate() in void context is now even more efficient by
           going directly through execute_for_fetch bypassing execute_array

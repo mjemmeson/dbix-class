@@ -384,7 +384,7 @@ sub load_classes {
 
         my $snsub = $comp_class->can('source_name');
         if(! $snsub ) {
-          carp "Failed to load $comp_class. Can't find source_name method. Is $comp_class really a full DBIC result class? Fix it, move it elsewhere, or make your load_classes call more specific.";
+          carp "Failed to load $comp_class. Can't find source_name method. Is $comp_class really a full DBIC result class? Is there a typo in $comp_class? Fix it, move it elsewhere, or make your load_classes call more specific.";
           next;
         }
         $comp = $snsub->($comp_class) || $comp;

@@ -1,13 +1,12 @@
 use warnings;
 
 use Test::More;
+use Data::Dumper::Concise;
 use lib qw(t/lib);
 use DBIC::SqlMakerTest;
 use DBICTest;
 
 my $schema = DBICTest->init_schema();
-
-plan tests => 1;
 
 # While this is a rather GIGO case, make sure it behaves as pre-103,
 # as it may result in hard-to-track bugs
@@ -32,3 +31,105 @@ is_same_sql(
       LEFT JOIN cd cd ON cd.cdid = single_track_2.cd
   )',
 );
+
+my $cds_rs = $schema->resultset('CD')->search(
+  [
+    {
+      'me.title' => "Caterwaulin' Blues",
+      'cds.title' => { '!=' => 'Forkful of bees' }
+    },
+    {
+      'me.title' => { '!=', => "Caterwaulin' Blues" },
+      'cds.title' => 'Forkful of bees'
+    },
+  ],
+  {
+    prefetch => { artist => 'cds' },
+    result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+  },
+);
+
+my $all = [ $cds_rs->all ];
+
+is_deeply $all, [
+  {
+    'single_track' => undef,
+    'cdid' => '1',
+    'artist' => {
+      'cds' => [
+        {
+          'single_track' => undef,
+          'artist' => '1',
+          'cdid' => '2',
+          'title' => 'Forkful of bees',
+          'genreid' => undef,
+          'year' => '2001'
+        },
+      ],
+      'artistid' => '1',   
+      'charfield' => undef,
+      'name' => 'Caterwauler McCrae',
+      'rank' => '13'
+    },
+    'title' => 'Spoonful of bees',
+    'year' => '1999',
+    'genreid' => '1'
+  },
+  {
+    'single_track' => undef,
+    'cdid' => '2',
+    'artist' => {
+      'cds' => [
+        {
+          'single_track' => undef,
+          'artist' => '1',
+          'cdid' => '2',
+          'title' => 'Forkful of bees',
+          'genreid' => undef,
+          'year' => '2001'
+        },
+      ],
+      'artistid' => '1',   
+      'charfield' => undef,
+      'name' => 'Caterwauler McCrae',
+      'rank' => '13'
+    },
+    'title' => 'Forkful of bees',
+    'year' => '2001',
+    'genreid' => undef
+  },
+  {
+    'single_track' => undef,
+    'cdid' => '3',
+    'artist' => {
+      'cds' => [
+        {
+          'single_track' => undef,
+          'artist' => '1',
+          'cdid' => '3',
+          'title' => 'Caterwaulin\' Blues',
+          'genreid' => undef,
+          'year' => '1997'
+        },
+        {
+          'single_track' => undef,
+          'artist' => '1',
+          'cdid' => '1',
+          'title' => 'Spoonful of bees',
+          'genreid' => '1',
+          'year' => '1999'
+        }
+      ],
+      'artistid' => '1',   
+      'charfield' => undef,
+      'name' => 'Caterwauler McCrae',
+      'rank' => '13'
+    },
+    'title' => 'Caterwaulin\' Blues',  
+    'year' => '1997',
+    'genreid' => undef
+  }
+], 'fix for multi-level prefetch bug'
+  or diag Dumper($all);
+
+done_testing;

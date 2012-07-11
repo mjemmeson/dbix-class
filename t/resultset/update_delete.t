@@ -200,4 +200,29 @@ is_same_sql_bind (
   'Update on prefetching resultset strips prefetch correctly'
 );
 
+$schema->storage->debugobj ($debugobj);
+$schema->storage->debug (1);
+$schema->resultset('CD')->search({
+  'me.cdid' => 1,
+  'artist.name' => 'partytimecity',
+}, {
+  join => 'artist',
+})->as_subselect_rs->delete;
+
+$schema->storage->debugobj ($orig_debugobj);
+$schema->storage->debug ($orig_debug);
+
+is_same_sql_bind (
+  $sql,
+  \@bind,
+  'DELETE FROM cd WHERE ( cdid IN (
+      SELECT me.cdid FROM cd me
+      JOIN artist artist
+        ON artist.artistid = me.artist
+      WHERE ( ( artist.name = ? AND me.cdid = ? ) )
+   ) )',
+  ["'partytimecity'", "'1'"],
+  'Delete from as_subselect_rs works correctly'
+);
+
 done_testing;

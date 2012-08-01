@@ -1,0 +1,60 @@
+On Tue, Jun 19, 2012 at 01:50:14PM -0500, fREW Schmidt wrote:
+> Just got your text, I pretty much have no reception, email is better.
+> Glad you caught it!
+
+On Jun 21, ribasushi wrote:
+Argh finally had some time to think about it (incidentally was a shower
+moment... hot steamy shower moment[1]). The identity calculator[2] the
+collapser relies on is fatally flawed - I do not properly track ids
+of the "left" partners, which when combined with a complex condtion
+which happens to prune some has_many branches but not others leads to
+a massive mix of results. Since I know the above made no sense, think
+about an artist with 3 CDs A, B & C:
+
+$cd_rs->search(
+  [
+    { 'me.title' => 'A', 'cds.title' => { '!=' => 'B' } },
+    { 'me.title' => { '!=', => 'A' }, 'cds.title' => 'B' },
+  ],
+  { prefetch => { artist => 'cds' } },
+);
+
+Since an artist is fully defined by its PK (which we already fetch),
+an all() run will keep accumulating all 3 CDs under the same already
+known hash, representing said artist, because I do not create two
+distinct pigeon-hole-hashes for "artist of A" and "artist of non-A".
+
+Argh!!!
+
+I won't be able to fix it tonight, I have to leave to the airport in
+less than 8h, and there won't be much sleep. If you can help me with
+a test based on the above - it would be awesome. In fact you could
+try your hand at fixing the identity calculator, though I shall not
+be held responsible for your ensuing insanity.
+
+Also note that the perl code generator will not need any adjustments,
+as long as you return the correct metadata from _resolve_collapse()
+
+Cheers
+
+[1] I will send you the bill for the wonderful mental image later
+[2] http://git.shadowcat.co.uk/gitweb/gitweb.cgi?p=dbsrgits/DBIx-Class.git;a=blob;f=lib/DBIx/Class/ResultSource/RowParser.pm;h=550c9e5b3a6fcb1688593ce36b38df1cdab918ec;hb=HEAD#l66
+
+On Fri, Jun 22, 2012 at 12:11 AM, fREW Schmidt <frioux@gmail.com> wrote:
+> I'll see what I can do making a test tomorrow if I can scrounge up the
+> mental discipline, otherwise expect next week (still away from Dallas.)
+>
+> Travel safe etc
+>
+>
+
+On Jul 7, 2012, fREW Schmidt wrote:
+Ok, so caelum wrote a test for
+this<http://git.shadowcat.co.uk/gitweb/gitweb.cgi?p=dbsrgits/DBIx-Class.git;a=commitdiff;h=606e1f322cf8f45743df8a0b4340ac32c06fe1e6>.
+It looks like it tests exactly what you were saying, and it indeed fails.
+On the other hand, as far as I can see it didn't pass in any of the past 4
+non-dev releases either.  Can you look over it and see if it looks like
+it's somehow testing the wrong thing?  It seems like the same thing to me
+but maybe something subtle is different.  If it *is* the same thing I'm
+just gonna release since it's not a regression.
+

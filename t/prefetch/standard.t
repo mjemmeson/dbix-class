@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Exception;
 use lib qw(t/lib);
 use DBICTest;
 
@@ -226,6 +227,13 @@ $rs->create({ artistid => 4, name => 'Unknown singer-songwriter' });
 $rs->create({ artistid => 5, name => 'Emo 4ever' });
 @artists = $rs->search(undef, { prefetch => 'cds', order_by => 'artistid' });
 is(scalar @artists, 5, 'has_many prefetch with adjacent empty rows ok');
+
+lives_ok { @artists = $rs->search(undef, {
+        join => ['cds'],
+        prefetch => [],
+        rows => 20,
+    });
+} 'join and empty prefetch ok';
 
 # -------------
 #

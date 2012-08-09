@@ -146,7 +146,7 @@ pairs, uses the hashref as the L</column_info> for that column. Repeated
 calls of this method will add more columns, not replace them.
 
 The column names given will be created as accessor methods on your
-L<DBIx::Class::ResultClass> objects. You can change the name of the accessor
+L<Result|DBIx::Class::ResultClass> objects. You can change the name of the accessor
 by supplying an L</accessor> in the column_info hash.
 
 If a column name beginning with a plus sign ('+col1') is provided, the
@@ -967,7 +967,7 @@ sub _invoke_sqlt_deploy_hook {
 
 =item Arguments: none
 
-=item Return Value: $resultset
+=item Return Value: L<$resultset|DBIx::Class::ResultSet>
 
 =back
 
@@ -1102,9 +1102,9 @@ sub from { die 'Virtual method!' }
 
 =over 4
 
-=item Arguments: $schema
+=item Arguments: L<$schema?|DBIx::Class::Schema>
 
-=item Return Value: A schema object
+=item Return Value: L<$schema|DBIx::Class::Schema>
 
 =back
 
@@ -1140,15 +1140,13 @@ sub schema {
 
 =item Arguments: none
 
-=item Return Value: A Storage object
+=item Return Value: L<$storage|DBIx::Class::Storage>
 
 =back
 
   $source->storage->debug(1);
 
-Returns the storage handle for the current schema.
-
-See also: L<DBIx::Class::Storage>
+Returns the L<storage handle|DBIx::Class::Storage> for the current schema.
 
 =cut
 
@@ -1286,7 +1284,7 @@ sub add_relationship {
 
 =item Arguments: none
 
-=item Return Value: List of relationship names
+=item Return Value: L<@rel_names|DBIx::Class::Relationship>
 
 =back
 
@@ -1304,14 +1302,14 @@ sub relationships {
 
 =over 4
 
-=item Arguments: $rel_name
+=item Arguments: L<$rel_name|DBIx::Class::Relationship>
 
-=item Return Value: Hashref of relation data,
+=item Return Value: L<\%rel_data|DBIx::Class::Relationship::Base/add_relationship>
 
 =back
 
 Returns a hash of relationship information for the specified relationship
-name. The keys/values are as specified for L</add_relationship>.
+name. The keys/values are as specified for L<DBIx::Class::Relationship::Base/add_relationship>.
 
 =cut
 
@@ -1324,7 +1322,7 @@ sub relationship_info {
 
 =over 4
 
-=item Arguments: $rel
+=item Arguments: L<$rel_name|DBIx::Class::Relationship>
 
 =item Return Value: 1/0 (true/false)
 
@@ -1343,9 +1341,9 @@ sub has_relationship {
 
 =over 4
 
-=item Arguments: $rel_name
+=item Arguments: L<$rel_name|DBIx::Class::Relationship>
 
-=item Return Value: Hashref of relationship data
+=item Return Value: L<\%rel_data|DBIx::Class::Relationship::Base/add_relationship>
 
 =back
 
@@ -1890,7 +1888,7 @@ sub related_source {
 
 =over 4
 
-=item Arguments: $rel_name
+=item Arguments: L<$rel_name|DBIx::Class::Relationship>
 
 =item Return Value: $classname
 
@@ -1914,7 +1912,7 @@ sub related_class {
 
 =item Arguments: none
 
-=item Return Value: $source_handle
+=item Return Value: L<$source_handle|DBIx::Class::ResultSourceHandle>
 
 =back
 

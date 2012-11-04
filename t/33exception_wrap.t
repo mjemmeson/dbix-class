@@ -3,6 +3,7 @@ use warnings;
 
 use Test::More;
 use Test::Exception;
+use Try::Tiny;
 
 use lib qw(t/lib);
 
@@ -22,5 +23,14 @@ is_deeply (
   [qw/ lol wut /],
   'Exception-arrayref contents preserved',
 );
+
+try {
+  $schema->txn_do(sub {
+    die bless ({ msg => 'foobar' }, 'DBICTest::Custom::Exception');
+  });
+} catch {
+  isa_ok ($_, 'DBICTest::Custom::Exception');
+  is_deeply( $_, { msg => 'foobar' });
+};
 
 done_testing;

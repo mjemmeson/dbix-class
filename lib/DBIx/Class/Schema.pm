@@ -745,38 +745,8 @@ found in L<DBIx::Class::Storage::DBI>.
 =back
 
 Pass this method a resultsource name, and an arrayref of
-arrayrefs. The arrayrefs should contain a list of column names,
-followed by one or many sets of matching data for the given columns.
-
-In void context, C<insert_bulk> in L<DBIx::Class::Storage::DBI> is used
-to insert the data, as this is a fast method. However, insert_bulk currently
-assumes that your datasets all contain the same type of values, using scalar
-references in a column in one row, and not in another will probably not work.
-
-Otherwise, each set of data is inserted into the database using
-L<DBIx::Class::ResultSet/create>, and a arrayref of the resulting row
-objects is returned.
-
-e.g.
-
-  $schema->populate('Artist', [
-    [ qw/artistid name/ ],
-    [ 1, 'Popular Band' ],
-    [ 2, 'Indie Band' ],
-    ...
-  ]);
-
-Since wantarray context is basically the same as looping over $rs->create(...)
-you won't see any performance benefits and in this case the method is more for
-convenience. Void context sends the column information directly to storage
-using <DBI>s bulk insert method. So the performance will be much better for
-storages that support this method.
-
-Because of this difference in the way void context inserts rows into your
-database you need to note how this will effect any loaded components that
-override or augment insert.  For example if you are using a component such
-as L<DBIx::Class::UUIDColumns> to populate your primary keys you MUST use
-wantarray context if you want the PKs automatically created.
+arrayrefs. See L<DBIx::Class::ResultSet/populate> for information about the
+format of \@data and the return value.
 
 =cut
 

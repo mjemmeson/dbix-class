@@ -2019,23 +2019,37 @@ sub delete_all {
 
 =over 4
 
-=item Arguments: \@data;
+=item Arguments: \@data
 
 =back
 
-Accepts either an arrayref of hashrefs or alternatively an arrayref of arrayrefs.
+Accepts either an arrayref of hashrefs or alternatively an arrayref of
+arrayrefs.
+
+In void context DBIC will neither retrieve any columns that have
+is_autoincrement or retrieve_on_insert set nor construct Result objects.
+It also employs more efficient ways to feed data to the underlying storage,
+since no pre or post processing is required.
+
+Otherwise each set of data is inserted using C<create> and the resulting
+objects are accumulated into an array. The array itself, or an array
+reference is returned depending on scalar or list context.
+Since this is basically the same as looping over $rs->create(...) you won't
+see any performance benefits, it just exists for convenience. 
+
+Please note an important effect on your data when choosing between void and
+non-void context:
+Since void context goes straight to insert_bulk it will skip any component
+that is overriding or augmenting C<insert>. So if you are using something like
+L<DBIx::Class::UUIDColumns> to create primary keys for you, you will find that
+your PKs are empty.  In this case you will have to use scalar or list context
+in order to create those values.
+
+
 For the arrayref of hashrefs style each hashref should be a structure suitable
-for submitting to a $resultset->create(...) method.
+for passing to C<create>.
 
-In void context, C<insert_bulk> in L<DBIx::Class::Storage::DBI> is used
-to insert the data, as this is a faster method.
-
-Otherwise, each set of data is inserted into the database using
-L<DBIx::Class::ResultSet/create>, and the resulting objects are
-accumulated into an array. The array itself, or an array reference
-is returned depending on scalar or list context.
-
-Example:  Assuming an Artist Class that has many CDs Classes relating:
+Example: Assuming an Artist class that has many CD classes relating:
 
   my $Artist_rs = $schema->resultset("Artist");
 
@@ -2067,24 +2081,17 @@ Example:  Assuming an Artist Class that has many CDs Classes relating:
   print $ArtistOne->name; ## response is 'Artist One'
   print $ArtistThree->cds->count ## reponse is '2'
 
-For the arrayref of arrayrefs style,  the first element should be a list of the
-fieldsnames to which the remaining elements are rows being inserted.  For
-example:
+For the arrayref of arrayrefs style, the first element should be a list of
+column names and each subsequent element should be data elements in that
+column order.
+For example:
 
   $Arstist_rs->populate([
-    [qw/artistid name/],
-    [100, 'A Formally Unknown Singer'],
-    [101, 'A singer that jumped the shark two albums ago'],
-    [102, 'An actually cool singer'],
+    [ qw( artistid name ) ],
+    [ 100, 'A Formally Unknown Singer' ],
+    [ 101, 'A singer that jumped the shark two albums ago' ],
+    [ 102, 'An actually cool singer' ],
   ]);
-
-Please note an important effect on your data when choosing between void and
-wantarray context. Since void context goes straight to C<insert_bulk> in
-L<DBIx::Class::Storage::DBI> this will skip any component that is overriding
-C<insert>.  So if you are using something like L<DBIx-Class-UUIDColumns> to
-create primary keys for you, you will find that your PKs are empty.  In this
-case you will have to use the wantarray context in order to create those
-values.
 
 =cut
 

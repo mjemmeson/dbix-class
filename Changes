@@ -1,5 +1,8 @@
 Revision history for DBIx::Class
 
+    * Misc
+        - Merge and improve the populate docs from Schema and ResultSet into ResultSet
+
 0.08203_01 2012-10-18 13:57 (UTC)
     * Fixes
         - Fix test failure on perl 5.8
